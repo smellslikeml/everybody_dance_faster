@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+import io
 import os
 import time
 import datetime
 import tensorflow as tf
+from google.cloud import storage
 
 from matplotlib import pyplot as plt
 
@@ -12,7 +14,7 @@ IMG_WIDTH = 512
 IMG_HEIGHT = 512
 OUTPUT_CHANNELS = 3
 LAMBDA = 100
-EPOCHS = 150
+EPOCHS = 1
 
 def load(image_file):
     image = tf.io.read_file(image_file)
@@ -53,7 +55,6 @@ def normalize(input_image, real_image):
 
 def load_image_train(image_file):
     input_image, real_image = load(image_file)
-    input_image, real_image = random_jitter(input_image, real_image)
     input_image, real_image = normalize(input_image, real_image)
 
     return input_image, real_image
@@ -101,7 +102,8 @@ def upsample(filters, size, apply_dropout=False):
     return result
 
 def Generator():
-    inputs = tf.keras.layers.Input(shape=[512,512,3])
+    #inputs = tf.keras.layers.Input(shape=[512,512,3])
+    inputs = tf.keras.layers.Input(shape=[256,256,3])
 
     down_stack = [
     downsample(64, 4, apply_batchnorm=False), # (bs, 128, 128, 64)
@@ -163,8 +165,10 @@ def generator_loss(disc_generated_output, gen_output, target):
 def Discriminator():
     initializer = tf.random_normal_initializer(0., 0.02)
 
-    inp = tf.keras.layers.Input(shape=[512, 512, 3], name='input_image')
-    tar = tf.keras.layers.Input(shape=[512, 512, 3], name='target_image')
+    #inp = tf.keras.layers.Input(shape=[512, 512, 3], name='input_image')
+    #tar = tf.keras.layers.Input(shape=[512, 512, 3], name='target_image')
+    inp = tf.keras.layers.Input(shape=[256, 256, 3], name='input_image')
+    tar = tf.keras.layers.Input(shape=[256, 256, 3], name='target_image')
 
     x = tf.keras.layers.concatenate([inp, tar]) # (bs, 256, 256, channels*2)
 
@@ -199,7 +203,7 @@ def discriminator_loss(disc_real_output, disc_generated_output):
     return total_disc_loss
 
 
-def generate_images(model, test_input, tar):
+def generate_images(model, test_input, tar, training=True):
     prediction = model(test_input, training=True)
     plt.figure(figsize=(15,15))
 
@@ -213,8 +217,25 @@ def generate_images(model, test_input, tar):
         plt.imshow(display_list[i] * 0.5 + 0.5)
         plt.axis('off')
     timestamp = int(time.time()*10000)
-    plt.imsave('{}_graph.png', str(timestamp))
-    #plt.show()
+    if training:
+        img_type = 'train'
+    else:
+        img_type = 'test'
+    fname = '{}_{}.png'.format(str(timestamp), img_type)
+    plt.savefig(fname='./checkpoints/graphs/' + fname)
+
+def generate_dance(model, source_input):
+    prediction = model(source_input, training=False)
+    plt.figure(figsize=(15,15))
+
+    display = prediction[0]
+
+    plt.imshow(display * 0.5 + 0.5)
+    plt.axis('off')
+    timestamp = int(time.time()*10000)
+    fname = '{}_generated.png'.format(str(timestamp))
+    plt.savefig(fname='./results/' + fname)
+
 
 @tf.function
 def train_step(input_image, target, epoch):
@@ -247,7 +268,6 @@ def fit(train_ds, epochs, test_ds):
     for epoch in range(epochs):
         start = time.time()
 
-        display.clear_output(wait=True)
 
         for example_input, example_target in test_ds.take(1):
             generate_images(generator, example_input, example_target)
@@ -298,14 +318,25 @@ if __name__ == '__main__':
                                      discriminator_optimizer=discriminator_optimizer,
                                      generator=generator,
                                      discriminator=discriminator)
+    if os.listdir('./checkpoints'):
+        checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
+
     log_dir="./logs/"
 
     summary_writer = tf.summary.create_file_writer(
-      log_dir + "fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+            log_dir + "fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 
     fit(train_dataset, EPOCHS, test_dataset)
 
-    # Restore from checkpoint after saving
+    # Restore from checkpoint and run inference
     checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
-    for inp, tar in test_dataset.take(5):
-        generate_images(generator, inp, tar)
+
+    test_data = './dataset/test/'
+    test_imgs = os.listdir(test_data)
+
+    for f in test_imgs:
+        input_img, real_img = load(test_data + f)
+        input_img, _ = normalize(input_img, real_img)
+        input_img = tf.expand_dims(input_img,0)
+
+        generate_dance(generator, input_img, training=False)
