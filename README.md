@@ -4,17 +4,18 @@
 [![Everybody Dance Faster flow](https://github.com/smellslikeml/motiontransfer/blob/master/assets/demo.gif)](https://www.youtube.com/watch?v=TXc6-ZTtlHw)
 
 ## Getting Started 
-These instructions will show how to prepare your image data, train a model, and deploy the model to classify human action from image samples. See deployment for notes on how to deploy the project on a live stream.
+*Read our [blog post](https://github.com/smellslikeml/ActionAI) for the full write-up*
+These instructions will show how to acquire pose estimates from a participant, train a pix2pix model, transfer source dance video, and generate a dance gif. 
 
 ### Prerequisites
-## Software
+### Software
 - [Tensorflow 2.0](https://www.tensorflow.org) (not required on EdgeTPU)
 - [EdgeTPU Python API](https://coral.ai/docs/edgetpu/api-intro) (for the EdgeTPU only)
 - [OpenCV](https://opencv-python-tutroals.readthedocs.io/en/latest/)
 - [Pillow](https://pillow.readthedocs.io/en/stable/)
 - [Google Cloud Storage Python client library](https://cloud.google.com/storage/docs/reference/libraries)
 
-## Hardware
+### Hardware
 - [Coral Dev Board EdgeTPU](https://coral.ai/products/dev-board/)
 - [GCP VM instance with GPU](https://cloud.google.com/compute/docs/gpus/)
 
