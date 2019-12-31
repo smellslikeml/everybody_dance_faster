@@ -21,6 +21,7 @@ from cairosvg import svg2png
 import cv2
 
 from pose_engine import PoseEngine
+from google.cloud import storage
 
 EDGES = (
     ('nose', 'left eye', 'rgb(230,25,75)'),
@@ -65,13 +66,31 @@ def draw_pose(dwg, pose, src_size, inference_box, color='cyan', threshold=0.2):
         bx, by = xys[b]
         dwg.add(dwg.line(start=(ax, ay), end=(bx, by), stroke=c, stroke_width=2))
 
+def upload_blob(bucket_name, source_file_name, destination_blob_name):
+    """Uploads a file to the bucket."""
+    # bucket_name = "your-bucket-name"
+    # source_file_name = "local/path/to/file"
+    # destination_blob_name = "storage-object-name"
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+
+    blob.upload_from_file(source_file_name)
+
+    print(
+        "File uploaded to {}.".format(
+            destination_blob_name
+        )
+    )
+
 model = 'models/posenet_mobilenet_v1_075_481_641_quant_decoder_edgetpu.tflite'
 print('Loading model: ', model)
 engine = PoseEngine(model)
 input_shape = engine.get_input_tensor_shape()
 inference_size = (input_shape[2], input_shape[1])
-src_size = (640, 480)
-total_width = 640*2
+src_size = (512, 512)
+bucket_name = 'YOUR-BUCKET-HERE'
 
 cap = cv2.VideoCapture(0)
 
@@ -89,11 +108,16 @@ def main():
         svg_string = svg_canvas.tostring()
         overlay = svg2png(bytestring=svg_string)
         overlay = Image.frombytes('RGBA', (640,480), overlay, 'raw')
-        new_im = Image.new('RGB', (total_width, 480))
+        # Resize both raw and overlay to 512x512 for training
+        pil_image.resize((512,512), Image.NEAREST)
+        overlay.resize((512,512), Image.NEAREST)
+        new_im = Image.new('RGB', (total_width, 512))
         new_im.paste(pil_image, (0,0))
-        new_im.paste(overlay, (640,0))
+        new_im.paste(overlay, (512,0))
         dt_stamp = int(time.time()*10000)
-        new_im.save('./images/{}_sample.png'.format(str(dt_stamp)))
+        save_img_name = 'images/{}_sample.png'.format(str(dt_stamp))
+        new_im.save(save_img_name)
+        upload_blob(bucket_name, save_img_name, save_img_name)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     cap.release()

@@ -14,7 +14,7 @@ IMG_WIDTH = 512
 IMG_HEIGHT = 512
 OUTPUT_CHANNELS = 3
 LAMBDA = 100
-EPOCHS = 1
+EPOCHS = 50
 
 def load(image_file):
     image = tf.io.read_file(image_file)
@@ -23,8 +23,8 @@ def load(image_file):
     w = tf.shape(image)[1]
 
     w = w // 2
-    real_image = image[:, :w, :]
-    input_image = image[:, w:, :]
+    input_image = image[:, :w, :]
+    real_image = image[:, w:, :]
 
     input_image = tf.cast(input_image, tf.float32)
     real_image = tf.cast(real_image, tf.float32)
@@ -102,8 +102,7 @@ def upsample(filters, size, apply_dropout=False):
     return result
 
 def Generator():
-    #inputs = tf.keras.layers.Input(shape=[512,512,3])
-    inputs = tf.keras.layers.Input(shape=[256,256,3])
+    inputs = tf.keras.layers.Input(shape=[512,512,3])
 
     down_stack = [
     downsample(64, 4, apply_batchnorm=False), # (bs, 128, 128, 64)
@@ -165,10 +164,8 @@ def generator_loss(disc_generated_output, gen_output, target):
 def Discriminator():
     initializer = tf.random_normal_initializer(0., 0.02)
 
-    #inp = tf.keras.layers.Input(shape=[512, 512, 3], name='input_image')
-    #tar = tf.keras.layers.Input(shape=[512, 512, 3], name='target_image')
-    inp = tf.keras.layers.Input(shape=[256, 256, 3], name='input_image')
-    tar = tf.keras.layers.Input(shape=[256, 256, 3], name='target_image')
+    inp = tf.keras.layers.Input(shape=[512, 512, 3], name='input_image')
+    tar = tf.keras.layers.Input(shape=[512, 512, 3], name='target_image')
 
     x = tf.keras.layers.concatenate([inp, tar]) # (bs, 256, 256, channels*2)
 
