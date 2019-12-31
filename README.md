@@ -1,7 +1,7 @@
 # Everybody Dance Faster 💃🏽🕺
 [![Python 3.x](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/downloads/release/python-370/)
 
-[![Everybody Dance Faster flow]()](https://www.youtube.com/watch?v=TXc6-ZTtlHw)
+[![Everybody Dance Faster flow](https://github.com/smellslikeml/motiontransfer/blob/master/assets/demo.gif)](https://www.youtube.com/watch?v=TXc6-ZTtlHw)
 
 ## Getting Started 
 These instructions will show how to prepare your image data, train a model, and deploy the model to classify human action from image samples. See deployment for notes on how to deploy the project on a live stream.
@@ -41,7 +41,7 @@ python3 train.py
 Periodic checkpoints will be stored in the ```checkpoints/``` directory. This script trains for 50 epochs to reduce training time.
 
 ## Generate Dance
-We've included default source video frames from the ![Bruno Mars - That's What I Like](https://www.youtube.com/watch?v=PMivT7MJ41M) music video. If you are using another source video, keep the framing, perspective, and background of your source in mind for better results.
+We've included default source video frames from the [Bruno Mars - That's What I Like](https://www.youtube.com/watch?v=PMivT7MJ41M) music video. If you are using another source video, keep the framing, perspective, and background of your source in mind for better results.
 
 To generate a dance gif of your participant, run the following on your Google Cloud training VM instance:
 ```python3
