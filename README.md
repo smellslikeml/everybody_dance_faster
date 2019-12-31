@@ -21,7 +21,7 @@ These instructions will show how to prepare your image data, train a model, and 
 ### Install
 We recommend using a virtual environment to avoid any conflicts with your system's global configuration. You can install the required dependencies via pip. The EdgeTPU will require the Python API as described above. 
 
-This demo also requires that you have a Google Cloud account and have configured the python client with credentials. See ![this](https://cloud.google.com/compute/docs/tutorials/python-guide) for more resources.
+This demo also requires that you have a Google Cloud account and have configured the python client with credentials. See [this](https://cloud.google.com/compute/docs/tutorials/python-guide) for more resources.
 
 ## Data Acquisition
 In the ```pose/``` directory, you will find all of the EdgeTPU resources required to capture training images from your booth participant. 
