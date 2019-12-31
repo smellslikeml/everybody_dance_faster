@@ -3,8 +3,8 @@
 
 [![Everybody Dance Faster flow](https://github.com/smellslikeml/motiontransfer/blob/master/assets/demo.gif)](https://www.youtube.com/watch?v=TXc6-ZTtlHw)
 
-## Getting Started 
-*Read our [blog post](https://github.com/smellslikeml/ActionAI) for the full write-up*
+*Read our [blog post](https://github.com/smellslikeml/ActionAI) for the full write-up.*
+
 These instructions will show how to acquire pose estimates from a participant, train a pix2pix model, transfer source dance video, and generate a dance gif. 
 
 ### Prerequisites
